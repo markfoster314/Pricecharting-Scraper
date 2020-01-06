@@ -1,4 +1,4 @@
-# Product Name
+# Pricecharting Scraper
 > This program uses web scraping to pull market values for old school nintendo games from Pricecharting.com without purchasing their API 
 
 [![NPM Version][npm-image]][npm-url]
@@ -54,7 +54,7 @@ npm test
 
 ## Meta
 
-Mark Foster – [LinkedIn](https://twitter.com/dbader_org) – markfoster314@yahoo.com
+Mark Foster – [LinkedIn](https://www.linkedin.com/in/markfoster314/) – markfoster314@yahoo.com
 
 Distributed under the XYZ license. See ``LICENSE`` for more information.
 
