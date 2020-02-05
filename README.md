@@ -1,12 +1,14 @@
 # Pricecharting Scraper
-> This program uses web scraping to pull market values for old school nintendo games from Pricecharting.com without purchasing their API 
+> This program uses web scraping to pull market values for old school nintendo games from Pricecharting.com without purchasing their API
 
-Pricecharting takes completed eBay transactions for classic video games over the past three months, and averages their prices to come up with fair market values. They sell an API to query this data, but the information is also available online for free, and listed plainly in their HTML. This application uses web scraping to create CSV files with these video games' fair market values. 
+Pricecharting takes completed eBay transactions for classic video games over the past three months, and averages their prices to come up with fair market values. They sell an API to query this data, but the information is also available online for free, and listed plainly in their HTML. This application uses web scraping to create CSV files with these video games' fair market values.
 
 
-## Usage example
+## Usage examples
 
 Using eBay's APIs, you can query active listings for these video games, compare their price to the values in the filled CSV files, and set up an application to notify you whenever there's a great deal.
+
+Run this script daily to gather historical pricing information for these video games, then come up with future price predictions and invest in video games
 
 ## Meta
 
