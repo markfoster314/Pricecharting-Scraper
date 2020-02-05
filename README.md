@@ -1,8 +1,19 @@
 # Pricecharting Scraper
-> This program uses web scraping to pull market values for old school nintendo games from Pricecharting.com without purchasing their API
+> This program uses web scraping to pull market values for video games from Pricecharting.com without purchasing their API
 
 Pricecharting takes completed eBay transactions for classic video games over the past three months, and averages their prices to come up with fair market values. They sell an API to query this data, but the information is also available online for free, and listed plainly in their HTML. This application uses web scraping to create CSV files with these video games' fair market values.
 
+## Installation
+
+### Required
+
+- `scraper.py` and a `Games` directory in the same directory
+- CSV files inside of the `Games` directory specifying which games to query
+> NOTE: For the time being, each console must have its own csv file, `[console].csv`, where `console` is the console's name as it appears on pricecharting's URL. Each csv file must contain one column, `game`, which stores a list of games to be queried for that console in the format of pricecharting's URL. This will be changed in a future update
+
+### Clone
+
+- Clone this repo to your local machine using `https://github.com/markfoster314/Pricecharting-Scraper`
 
 ## Usage examples
 
