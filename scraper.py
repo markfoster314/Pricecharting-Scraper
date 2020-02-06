@@ -25,7 +25,7 @@ def scrape_pricecharting(console, game):
   soup = BeautifulSoup(page.content, 'html.parser')
   allPrices = list(list(list(soup.children)[16])[1])
   try:
-    vals = [re.findall("(?:\d+\.\d+|N/A)", str(list(list(allPrices[2 * i + 1])[1])[0].encode('utf-8')))[0] for i in range(6)]
+    vals = [re.findall("(?:\d+\.\d+|N/A)", str(list(list(allPrices[2 * i + 1])[1])[0].encode('utf-8')))[0].replace("N/A", "") for i in range(6)]
     print("[{}] on [{}] Has Been Scraped".format(game, console))
     return vals
   except:
