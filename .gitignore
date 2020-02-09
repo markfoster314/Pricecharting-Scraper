@@ -1,3 +1,5 @@
 # ignore created game_prices files
 .*/
 !.*Games/
+
+*.log

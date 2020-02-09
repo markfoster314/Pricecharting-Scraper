@@ -5,6 +5,8 @@ Pricecharting takes completed eBay transactions for classic video games over the
 
 ## Installation
 
+TODO https://selenium.dev/selenium/docs/api/py/ ensure drivers are installed
+
 ### Required
 
 - `scraper.py` and a `Games` directory in the same directory

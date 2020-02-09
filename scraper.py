@@ -9,6 +9,7 @@ import random
 import time
 from datetime import datetime
 import csv
+import urllib
 
 
 def scrape_pricecharting(console, game):
@@ -72,7 +73,31 @@ def main():
   create_dir(dt)
   fill_csv(dt, fn)
 
+def scrape_links(site):
+  page = requests.get(site)
+  soup = BeautifulSoup(page.content, 'html.parser')
+  # allPrices = list(soup)
+  for link in soup.findAll('a'):
+    print(link.get('href'))
+
+
+def pull_table():
+  urlNes = "https://www.pricecharting.com/console/nes"
+  with urllib.request.urlopen(urlNes) as url:
+    s = url.read()
+    soup = BeautifulSoup(s)
+    indicateGameDone = soup.findAll("td", {"class": "price numeric used_price"})
+    for x in indicateGameDone:
+      print(x.text)
+
+
+
+
 if __name__== "__main__":
   """Entry point for our program
   """
-  main()
+  # pull_table()
+  scrape_links("https://www.pricecharting.com/console/nes")
+  # site = input("URL")
+  # scrape_links(site)
+  # main()
