@@ -1,5 +1,5 @@
-# ignore created game_prices files
-.*/
-!.*Games/
+geckodriver/
+
+__pycache__/
 
 *.log
