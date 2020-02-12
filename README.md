@@ -1,13 +1,13 @@
 # Pricecharting Scraper
 > This program uses web scraping to pull market values for video games from Pricecharting.com without purchasing their API
 
-Pricecharting uses eBays's APIs to query successful transactions over the past three months for video games, then averages these values to come up with fair market values. They sell an API to query this data, but the information is also available online for free, and listed plainly in their HTML. This application uses web scraping to create CSV files with video games' fair market values.
+Pricecharting uses eBays's APIs to query successful transactions over the past three months for video games, then averages these values to come up with fair market values. They sell an API to query this data, but the information is also available online for free, and listed plainly in their HTML. This application uses web scraping to create a CSV file with containing games' fair market values.
 
 ## Installation
 
 ### Required
-- Python 3
-  - This program was developed with Python 3.6.9
+- Python 3.4+
+  - This program was developed with Python 3.6.9, Selenium requires Python 3.4+
 - Firefox browser
   - I'm working on support for Chrome, Edge and Safari
   - In the meantime if Firefox is not installed on your machine install it [here](https://www.mozilla.org/en-US/firefox/new/)
