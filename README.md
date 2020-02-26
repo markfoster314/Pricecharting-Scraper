@@ -1,14 +1,14 @@
 # Pricecharting Scraper
 > This program uses web scraping to pull market values for video games from Pricecharting.com without purchasing their API
 
-Pricecharting uses eBays's APIs to query successful transactions over the past three months for video games, classifies each transaction, then averages these values to come up with fair market values for loose cartridges, complete in box games (cartridge + manual + box), and sealed games. They sell an API to query this data, but the information is also available online for free. This application uses web scraping to create a CSV file with containing games' fair market values.
+Pricecharting uses eBay's APIs to query successful transactions over the past three months for video games, classifies each transaction, then averages these values to come up with fair market values for loose cartridges, complete in box games (cartridge + manual + box), and sealed games. They sell an API to query this data, but the information is also available online for free. This application uses web scraping to create a CSV file with games' fair market values.
 
 ## Installation
 
 ### Required
 - Python 3.4+
 - Firefox browser
-  - I'm working on support for Chrome, Edge and Safari
+  - Currently working on support for Chrome, Edge and Safari
   - In the meantime if Firefox is not installed on your machine install it [here](https://www.mozilla.org/en-US/firefox/new/)
 - Selenium and geckodriver
   - This application uses Selenium for web based automation which requires geckodriver for use in Firefox.
@@ -31,12 +31,3 @@ Run this script daily to gather historical pricing information for these video g
 ## Meta
 
 Mark Foster – [LinkedIn](https://www.linkedin.com/in/markfoster314/) – markfoster314@yahoo.com
-
-
-<!-- Markdown link & img dfn's -->
-[npm-image]: https://img.shields.io/npm/v/datadog-metrics.svg?style=flat-square
-[npm-url]: https://npmjs.org/package/datadog-metrics
-[npm-downloads]: https://img.shields.io/npm/dm/datadog-metrics.svg?style=flat-square
-[travis-image]: https://img.shields.io/travis/dbader/node-datadog-metrics/master.svg?style=flat-square
-[travis-url]: https://travis-ci.org/dbader/node-datadog-metrics
-[wiki]: https://github.com/yourname/yourproject/wiki
