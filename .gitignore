@@ -3,3 +3,5 @@ geckodriver/
 __pycache__/
 
 *.log
+
+venv/
