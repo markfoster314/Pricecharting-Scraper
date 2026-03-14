@@ -1,33 +1,93 @@
 # Pricecharting Scraper
-> This program uses web scraping to pull market values for video games from Pricecharting.com without purchasing their API
 
-Pricecharting uses eBay's APIs to query successful transactions over the past three months for video games, classifies each transaction, then averages these values to come up with fair market values for loose cartridges, complete in box games (cartridge + manual + box), and sealed games. They sell an API to query this data, but the information is also available online for free. This application uses web scraping to create a CSV file with games' fair market values.
+> A Python-based web scraper that collects fair market values for video games from [PriceCharting.com](https://www.pricecharting.com), without requiring a paid API subscription.
 
-## Installation
+PriceCharting uses eBay's transaction data to calculate fair market values for video games across three conditions: **loose** (cartridge only), **complete in box** (cartridge + manual + box), and **sealed/new**. While they offer a paid API, this data is also freely available on their website. This scraper automates the collection of that data into structured CSV output.
 
-### Required
+---
+
+## Getting Started
+
+### Prerequisites
+
 - Python 3.4+
-- Firefox browser
-  - Currently working on support for Chrome, Edge and Safari
-  - In the meantime if Firefox is not installed on your machine install it [here](https://www.mozilla.org/en-US/firefox/new/)
-- Selenium and geckodriver
-  - This application uses Selenium for web based automation which requires geckodriver for use in Firefox.
-  - Click [here](https://selenium.dev/selenium/docs/api/py/) for installation instructions
+- Firefox browser — [Download here](https://www.mozilla.org/en-US/firefox/new/) if not already installed
+- `geckodriver` — required by Selenium to drive Firefox; see [installation instructions](https://selenium.dev/selenium/docs/api/py/)
 
-### Clone
+### Clone the Repository
 
-- Clone this repo to your local machine using `https://github.com/markfoster314/Pricecharting-Scraper`
+```bash
+git clone https://github.com/slongstreet/Pricecharting-Scraper.git
+cd Pricecharting-Scraper
+```
 
-## Run
-- To run this application, ensure all dependencies are fulfilled, navigate to your directory,  and run `scraper.py`
-- If run correctly, a new directory titled with the current date and time should be created in your directory. This directory contains a csv file `game_prices.csv` which contains all the scraped data
+### Install Dependencies
 
-## Usage examples
+This project uses a Python virtual environment managed via `make`:
 
-Using eBay's APIs, you can query active listings for these video games, compare their price to the values in the filled CSV files, and set up an application to notify you whenever there's a great deal.
+```bash
+make install
+```
 
-Run this script daily to gather historical pricing information for these video games, then come up with future price predictions and invest in video games
+This creates a `venv/` directory and installs all packages from `requirements.txt`.
 
-## Meta
+---
 
-Mark Foster – [LinkedIn](https://www.linkedin.com/in/markfoster314/) – markfoster314@yahoo.com
+## Usage
+
+### Run the Scraper
+
+```bash
+make run
+```
+
+This executes `scraper.py` using the project's virtual environment. The scraper will open Firefox, scroll through the PriceCharting page for each configured console, and collect pricing data.
+
+### Output
+
+After a successful run, two outputs are generated:
+
+- **Timestamped folder** (e.g., `14.03.2026_12.00.00/`) — contains `game_prices.csv` with the scraped data for that run.
+- **`output-latest/`** — always contains the most recent run's `game_prices.csv` and a `manifest.json` with the corresponding datestamp.
+
+### Initialize the Database
+
+```bash
+make db
+```
+
+Runs `create_db.py` to initialize a local SQLite database (`gameprices.db`).
+
+### Clean the Project
+
+```bash
+make clean
+```
+
+Removes the virtual environment (`venv/`), Python cache, and any timestamped output directories.
+
+---
+
+## Configuration
+
+To change which consoles are scraped, edit the `CONSOLES` list near the top of `scraper.py`:
+
+```python
+CONSOLES = ["sega-game-gear"]
+```
+
+Console names must match their URL slug on PriceCharting (e.g., `"super-nintendo"`, `"nintendo-64"`, `"playstation-2"`). A larger commented-out list of supported consoles is included in the file for reference.
+
+---
+
+## Use Cases
+
+- **Deal hunting** — Compare scraped prices against active eBay listings to surface great deals automatically.
+- **Price history** — Run the scraper on a schedule to build a historical pricing dataset for trend analysis.
+- **Investment research** — Track value changes over time to inform video game collecting decisions.
+
+---
+
+## Acknowledgements
+
+This project is a fork of the original [Pricecharting-Scraper](https://github.com/markfoster314/Pricecharting-Scraper) by [Mark Foster](https://github.com/markfoster314). Thanks to Mark for the initial implementation.
