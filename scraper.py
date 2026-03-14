@@ -43,6 +43,13 @@ def gameCsv(games):
             writer.writerow({'game': g.getTitle(), 'console': g.getConsole(), 'loose_val': g.getLoosePrice(), 'complete_val': g.getCompletePrice(),
             'new_val': g.getNewPrice(), 'date(D/M/Y)': dt.split('_')[0].replace('.', '/')})
 
+    # create a copy as 'output-latest'
+    latest_dir = "output-latest"
+    if not os.path.exists(latest_dir):
+        os.mkdir(latest_dir)
+    import shutil
+    shutil.copy2(os.path.join(dt, fn), os.path.join(latest_dir, fn))
+
 
 def scrollBottom(console):
     """Scrolls to the bottom of webpage. pricecharting.com/console/<console-name> loads x number of videogames at a time, this loads all

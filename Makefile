@@ -1,12 +1,13 @@
-.PHONY: venv install run clean
+.PHONY: install run clean
 
-venv:
+venv/bin/activate: requirements.txt
 	python3 -m venv venv
-
-install: venv
 	./venv/bin/pip install -r requirements.txt
+	touch venv/bin/activate
 
-run:
+install: venv/bin/activate
+
+run: venv/bin/activate
 	./venv/bin/python scraper.py
 
 clean:
