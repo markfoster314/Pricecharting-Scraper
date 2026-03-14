@@ -10,4 +10,4 @@ run:
 	./venv/bin/python scraper.py
 
 clean:
-	rm -rf venv __pycache__
+	rm -rf venv __pycache__ [0-9][0-9].[0-9][0-9].[0-9][0-9][0-9][0-9]_[0-9][0-9].[0-9][0-9].[0-9][0-9]
