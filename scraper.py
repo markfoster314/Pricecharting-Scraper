@@ -1,6 +1,7 @@
 import time
 import re
 import csv
+import json
 import os
 import concurrent.futures
 from videogame import VideoGame
@@ -49,6 +50,11 @@ def gameCsv(games):
         os.mkdir(latest_dir)
     import shutil
     shutil.copy2(os.path.join(dt, fn), os.path.join(latest_dir, fn))
+
+    # write manifest.json
+    manifest_path = os.path.join(latest_dir, 'manifest.json')
+    with open(manifest_path, 'w') as manifest_file:
+        json.dump({"datestamp": dt}, manifest_file, indent=4)
 
 
 def scrollBottom(console):
