@@ -57,7 +57,7 @@ def scrollBottom(console):
     SCROLL_PAUSE_TIME = 1
     browser = webdriver.Firefox()
 
-    browser.get('https://www.pricecharting.com/console/' + console)
+    browser.get('https://www.pricecharting.com/console/' + console + '?sort=name')
     prevHeight = browser.execute_script("return document.body.scrollHeight")
     atBottom = False # occasionally selenium lags, this ensures that we are truly at the bottom
     while True:
