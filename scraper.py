@@ -13,10 +13,11 @@ from datetime import datetime
 #TODO add compression for csv file, convert the three doubles into one value
 
 # console names as they appear in pricecharting.com URLs
-CONSOLES = ["super-nintendo", "nes", "nintendo-64", "gamecube", "wii", "wii-u", "nintendo-switch", "gameboy",
-        "gameboy-advance", "nintendo-ds", "virtual-boy", "game-&-watch", "playstation", "playstation-2", "playstation-3",
-        "playstation-4", "sega-master-system", "sega-genesis", "sega-32x", "sega-saturn",
-        "sega-dreamcast", "sega-game-gear", "xbox", "xbox-360", "xbox-one", "atari-2600", "atari-5200"]
+CONSOLES = ["sega-game-gear"]
+#CONSOLES = ["super-nintendo", "nes", "nintendo-64", "gamecube", "wii", "wii-u", "nintendo-switch", "gameboy",
+#        "gameboy-advance", "nintendo-ds", "virtual-boy", "game-&-watch", "playstation", "playstation-2", "playstation-3",
+#        "playstation-4", "sega-master-system", "sega-genesis", "sega-32x", "sega-saturn",
+#        "sega-dreamcast", "sega-game-gear", "xbox", "xbox-360", "xbox-one", "atari-2600", "atari-5200"]
 
 # produce exception "Failed to decode response from marionette" in main()
 TROUBLE_CONSOLES_MARIONETTE = ["psp", "nintendo-3ds", "atari-7800", "jaguar"]
@@ -88,11 +89,11 @@ def scrapeVals(console, browser):
     soup = BeautifulSoup(browser.page_source, 'html.parser')
     for EachPart in soup.select('tr[id*="product-"]'):
         title = re.search(r'>(.*?)</a>', str(EachPart.select('td[class="title"]'))).group(1)
-        loosePrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric used_price"]')))
+        loosePrice = re.findall(r"\d+\.\d+", str(EachPart.select('td[class="price numeric used_price"]')))
         loosePrice = loosePrice[0] if len(loosePrice) > 0 else "N/A"
-        completePrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric cib_price"]')))
+        completePrice = re.findall(r"\d+\.\d+", str(EachPart.select('td[class="price numeric cib_price"]')))
         completePrice = completePrice[0] if len(completePrice) > 0 else "N/A"
-        newPrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric new_price"]')))
+        newPrice = re.findall(r"\d+\.\d+", str(EachPart.select('td[class="price numeric new_price"]')))
         newPrice = newPrice[0] if len(newPrice) > 0 else "N/A"
         newGame = VideoGame(title, console, loosePrice, completePrice, newPrice)
         games.append(newGame)
