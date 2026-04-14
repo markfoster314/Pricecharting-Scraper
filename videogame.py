@@ -1,35 +1,31 @@
 class VideoGame:
-    def __init__(self, title, console, loosePrice, completePrice, newPrice):
+    def __init__(self, title, console, loose_price, complete_price, new_price):
         self.title = title
         self.console = console
-        self.loosePrice = loosePrice
-        self.completePrice = completePrice
-        self.newPrice = newPrice
+        self.loose_price = loose_price
+        self.complete_price = complete_price
+        self.new_price = new_price
 
     def getTitle(self):
         return self.title
-    def setTitle(self, title):
-        self.title = title
 
     def getConsole(self):
         return self.console
-    def setConsole(self, console):
-        self.console = console
 
     def getLoosePrice(self):
-        return self.loosePrice
-    def setLoosePrice(self, loosePrice):
-        self.loosePrice = loosePrice
+        return self.loose_price
 
     def getCompletePrice(self):
-        return self.completePrice
-    def setCompletePrice(self, completePrice):
-        self.completePrice = completePrice
+        return self.complete_price
 
     def getNewPrice(self):
-        return self.newPrice
-    def setNewPrice(self, newPrice):
-        self.newPrice = newPrice
+        return self.new_price
 
-    def printVals(self):
-        print ("Title: {}\nConsole: {}\nLoose: ${}\nComplete: ${}\nNew: ${}\n\n".format(self.title, self.console, self.loosePrice, self.completePrice, self.newPrice))
+    def __repr__(self):
+        return (
+            f"Title: {self.title}\n"
+            f"Console: {self.console}\n"
+            f"Loose: ${self.loose_price}\n"
+            f"Complete: ${self.complete_price}\n"
+            f"New: ${self.new_price}\n"
+        )

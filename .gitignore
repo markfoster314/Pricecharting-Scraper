@@ -1,5 +1,8 @@
-geckodriver/
-
+venv/
 __pycache__/
-
-*.log
+*.pyc
+*.pyo
+.env
+*.csv
+.pytest_cache/
+**/__pycache__/

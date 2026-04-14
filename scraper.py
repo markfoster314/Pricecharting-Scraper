@@ -1,138 +1,243 @@
 import time
-import re
 import csv
 import os
+import argparse
 import concurrent.futures
-from videogame import VideoGame
-from selenium import webdriver
-from bs4 import BeautifulSoup
 from datetime import datetime
 
-#TODO support TROUBLE_CONSOLES_MARIONETTE and TROUBLE_CONSOLES_KILL
-#TODO add support for browsers other than firefox in scrollBottom()
-#TODO add compression for csv file, convert the three doubles into one value
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from webdriver_manager.chrome import ChromeDriverManager
+from bs4 import BeautifulSoup
 
-# console names as they appear in pricecharting.com URLs
-CONSOLES = ["super-nintendo", "nes", "nintendo-64", "gamecube", "wii", "wii-u", "nintendo-switch", "gameboy",
-        "gameboy-advance", "nintendo-ds", "virtual-boy", "game-&-watch", "playstation", "playstation-2", "playstation-3",
-        "playstation-4", "sega-master-system", "sega-genesis", "sega-32x", "sega-saturn",
-        "sega-dreamcast", "sega-game-gear", "xbox", "xbox-360", "xbox-one", "atari-2600", "atari-5200"]
+from videogame import VideoGame
 
-# produce exception "Failed to decode response from marionette" in main()
-TROUBLE_CONSOLES_MARIONETTE = ["psp", "nintendo-3ds", "atari-7800", "jaguar"]
 
-# produce exception "invalid argument: can't kill an exited process" in main()
-TROUBLE_CONSOLES_KILL = ["sega-cd", "gameboy-color", "playstation-vita", "atari-lynx"]
+NINTENDO_CONSOLES = [
+    "super-nintendo", "nes", "nintendo-64", "gamecube", "wii", "wii-u",
+    "nintendo-switch", "nintendo-switch-2", "gameboy", "gameboy-color", "gameboy-advance",
+    "nintendo-ds", "nintendo-3ds", "virtual-boy", "game-&-watch",
+]
 
-def gameCsv(games):
-    """Creates csv file to store our scraped data
+SONY_CONSOLES = [
+    "playstation", "playstation-2", "playstation-3", "playstation-4",
+    "playstation-5", "psp", "playstation-vita",
+]
+
+XBOX_CONSOLES = [
+    "xbox", "xbox-360", "xbox-one", "xbox-series-x"
+]
+
+ATARI_CONSOLES = [
+    "atari-2600", "atari-5200", "atari-7800", "atari-400", "atari-lynx", "jaguar",
+]
+
+NEO_GEO_CONSOLES = [
+    "neo-geo-mvs", "neo-geo-aes", "neo-geo-cd", "neo-geo-pocket-color"
+]
+
+SEGA_CONSOLES = [
+    "sega-master-system", "sega-genesis", "sega-32x", "sega-cd",
+    "sega-saturn", "sega-dreamcast", "sega-game-gear", "sega-pico"
+]
+
+CONSOLES = [
+    *NINTENDO_CONSOLES,
+    *SONY_CONSOLES,
+    *XBOX_CONSOLES,
+    *ATARI_CONSOLES,
+    *NEO_GEO_CONSOLES,
+    *SEGA_CONSOLES,
+]
+
+
+def make_browser():
+    """Creates a headless Chrome browser instance configured for WSL/Linux."""
+    print("Making browser...")
+    options = Options()
+    options.add_argument("--headless=new")
+    options.add_argument("--no-sandbox")
+    options.add_argument("--disable-dev-shm-usage")
+    options.add_argument("--disable-gpu")
+    options.add_argument("--window-size=1920,1080")
+    service = Service(ChromeDriverManager().install())
+    return webdriver.Chrome(service=service, options=options)
+
+
+def scroll_to_bottom(browser, pause_time):
+    """Scrolls to the bottom of the page repeatedly until no new content loads.
+
+    pricecharting.com lazy-loads games in batches, so we keep scrolling until
+    the page height has been stable for STABLE_SCROLL_COUNT consecutive checks.
 
     Args:
-        games: (list of videogame objects) videogame data scraped in our program
+        browser: the browser instance
+        pause_time: time to wait between scrolls
     """
-    dt = datetime.now().strftime("%d.%m.%Y_%H.%M.%S")
-    fn = "game_prices.csv"
-    if not os.path.exists(dt):
-        os.mkdir(dt)
-    with open(os.path.join(dt, fn), 'w') as csv_file:
-        fieldnames = ['game', 'console', 'loose_val', 'complete_val', 'new_val', 'date(D/M/Y)']
-        writer = csv.DictWriter(csv_file, fieldnames=fieldnames)
-        writer.writeheader()
-        for g in games:
-            writer.writerow({'game': g.getTitle(), 'console': g.getConsole(), 'loose_val': g.getLoosePrice(), 'complete_val': g.getCompletePrice(),
-            'new_val': g.getNewPrice(), 'date(D/M/Y)': dt.split('_')[0].replace('.', '/')})
+    prev_height = browser.execute_script("return document.body.scrollHeight")
+    stable_count = 0
+    # Number of consecutive times height must be unchanged before we consider the page fully loaded.
+    # Guards against lag between scroll and content render.
+    STABLE_SCROLL_COUNT = 3
 
-
-def scrollBottom(console):
-    """Scrolls to the bottom of webpage. pricecharting.com/console/<console-name> loads x number of videogames at a time, this loads all
-        videogames for our console before we scrape values
-
-    Args:
-        console: (string) game system name as it appears in the pricecharting URL
-
-    Returns:
-        (browser) html for webpage with all values loaded
-    """
-    SCROLL_PAUSE_TIME = 1
-    browser = webdriver.Firefox()
-
-    browser.get('https://www.pricecharting.com/console/' + console)
-    prevHeight = browser.execute_script("return document.body.scrollHeight")
-    atBottom = False # occasionally selenium lags, this ensures that we are truly at the bottom
-    while True:
-        time.sleep(SCROLL_PAUSE_TIME)
+    while stable_count < STABLE_SCROLL_COUNT:
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        currHeight = browser.execute_script("return document.body.scrollHeight")
-        if prevHeight == currHeight:
-            if atBottom:
-                break
-            atBottom = True
+        time.sleep(pause_time)
+        curr_height = browser.execute_script("return document.body.scrollHeight")
+        if curr_height == prev_height:
+            stable_count += 1
         else:
-            atBottom = False
-        prevHeight = currHeight
-
-    return browser
+            stable_count = 0
+        prev_height = curr_height
 
 
-def scrapeVals(console, browser):
-    """Scrapes titles and values for each videogame in our webpage
+def scrape_console(console, pause_time):
+    """Opens the pricecharting page for a console, scrolls to load all games,
+    then parses and returns a list of VideoGame objects.
 
     Args:
-        console: (string) game system name as it appears in the pricecharting URL
-        browser: (browser) html for webpage with all values loaded
+        console: console slug as it appears in the pricecharting.com URL
+        pause_time: time to wait between scrolls
 
     Returns:
-        (list) videogame objects for our console
+        list of VideoGame objects
     """
+    print(f"[{console}] Starting scrape...")
+    browser = make_browser()
     games = []
-    soup = BeautifulSoup(browser.page_source, 'html.parser')
-    for EachPart in soup.select('tr[id*="product-"]'):
-        title = re.search(r'>(.*?)</a>', str(EachPart.select('td[class="title"]'))).group(1)
-        loosePrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric used_price"]')))
-        loosePrice = loosePrice[0] if len(loosePrice) > 0 else "N/A"
-        completePrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric cib_price"]')))
-        completePrice = completePrice[0] if len(completePrice) > 0 else "N/A"
-        newPrice = re.findall("\d+\.\d+", str(EachPart.select('td[class="price numeric new_price"]')))
-        newPrice = newPrice[0] if len(newPrice) > 0 else "N/A"
-        newGame = VideoGame(title, console, loosePrice, completePrice, newPrice)
-        games.append(newGame)
+
+    try:
+        browser.get(f"https://www.pricecharting.com/console/{console}")
+
+        # Wait for the games table to be present before we start scrolling
+        WebDriverWait(browser, 20).until(
+            EC.presence_of_element_located((By.ID, "games_table"))
+        )
+
+        scroll_to_bottom(browser, pause_time)
+
+        soup = BeautifulSoup(browser.page_source, "lxml")
+        table = soup.find("table", {"id": "games_table"})
+
+        if not table:
+            print(f"[{console}] WARNING: games_table not found on page.")
+            return games
+
+        for row in table.select("tbody tr"):
+            title_td = row.find("td", class_="title")
+            if not title_td:
+                continue
+
+            title_tag = title_td.find("a")
+            title = title_tag.get_text(strip=True) if title_tag else title_td.get_text(strip=True)
+
+            def parse_price(css_class):
+                td = row.find("td", class_=css_class)
+                if not td:
+                    return "N/A"
+                text = td.get_text(strip=True).replace("$", "").replace(",", "")
+                return text if text else "N/A"
+
+            loose = parse_price("used_price")
+            complete = parse_price("cib_price")
+            new = parse_price("new_price")
+
+            games.append(VideoGame(title, console, loose, complete, new))
+
+        print(f"[{console}] Done — {len(games)} games scraped.")
+    except Exception as exc:
+        print(f"[{console}] ERROR: {exc}")
+    finally:
+        browser.quit()
+
     return games
 
 
-def pullVals(console):
-    """Pulls values from pricecharting.com
+def write_csv(all_games, output_file):
+    """Writes all scraped VideoGame objects to game_prices.csv.
 
     Args:
-        console: (string) game system name as it appears in the pricecharting URL
-
-    Returns:
-        (list) videogame objects
+        all_games: list of VideoGame objects
+        output_file: name of the output file
     """
-    print ('Pulling values for %s console\n' % (console))
-    browser = scrollBottom(console)
-    return scrapeVals(console, browser)
+    today = datetime.now().strftime("%d/%m/%Y")
+    fieldnames = ["game", "console", "loose_val", "complete_val", "new_val", "date(D/M/Y)"]
+
+    with open(output_file, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=fieldnames)
+        writer.writeheader()
+        for g in all_games:
+            writer.writerow({
+                "game": g.getTitle(),
+                "console": g.getConsole(),
+                "loose_val": g.getLoosePrice(),
+                "complete_val": g.getCompletePrice(),
+                "new_val": g.getNewPrice(),
+                "date(D/M/Y)": today,
+            })
+
+    print(f"\nCSV written to {os.path.abspath(output_file)} ({len(all_games)} total games)")
 
 
 def main():
-    """Orders execution of our program: scrape vals for each console then create CSV file
-    """
-    allGames = []
-    with concurrent.futures.ThreadPoolExecutor() as executor:
-        futureGames = {executor.submit(pullVals, console): console for console in CONSOLES}
-        for future in concurrent.futures.as_completed(futureGames):
-            scrapedConsole = futureGames[future]
+    parser = argparse.ArgumentParser(description="Scrape video game prices from pricecharting.com")
+    parser.add_argument(
+        "--workers",
+        type=int,
+        default=1,
+        help="Number of concurrent browser instances (default: 1). Increase with caution on WSL."
+    )
+    parser.add_argument(
+        "--console",
+        type=str,
+        default=None,
+        help="Scrape a single console by name (e.g. --console super-nintendo). Omit to scrape all consoles."
+    )
+    parser.add_argument(
+        "--output",
+        type=str,
+        default="game_prices.csv",
+        help="Output CSV filename (default: game_prices.csv)"
+    )
+    parser.add_argument(
+        "--pause",
+        type=float,
+        default=1.5,
+        help="Seconds to wait between scrolls (default: 1.5). Increase if games are not fully loading."
+    )
+    args = parser.parse_args()
+    
+    if args.console:
+        target_consoles = [args.console]
+    else:
+        target_consoles = CONSOLES
+        
+    if args.console and args.console not in CONSOLES:
+        print(f"WARNING: '{args.console}' is not in the known CONSOLES list. Proceeding anyway...")
+
+    print(f"Scraping values from pricecharting.com (max_workers={args.workers})\n")
+    all_games = []
+
+    with concurrent.futures.ThreadPoolExecutor(max_workers=args.workers) as executor:
+        future_to_console = {
+            executor.submit(scrape_console, console, args.pause): console
+            for console in target_consoles
+        }
+        for future in concurrent.futures.as_completed(future_to_console):
+            console = future_to_console[future]
             try:
-                consoleGames = future.result()
-                allGames = allGames + consoleGames
-                print ('%s console games successfully scraped\n' % (scrapedConsole))
+                games = future.result()
+                all_games.extend(games)
             except Exception as exc:
-                print ('%s console generated an exception: %s' % (scrapedConsole, exc))
-    gameCsv(allGames)
+                print(f"[{console}] Unhandled exception: {exc}")
+
+    write_csv(all_games, args.output)
+    print("Finished.")
 
 
-if __name__== "__main__":
-    """Entry point for our program
-    """
-    print ('Scraping values from pricecharting.com\n')
+if __name__ == "__main__":
     main()
-    print ('Finished scraping values from pricecharting.com')
